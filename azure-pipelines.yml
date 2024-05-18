@@ -32,4 +32,5 @@ steps:
     artifactName: e2e-server
     targetPath: '$(Build.ArtifactStagingDirectory)'
     publishLocation: 'pipeline'
-  displayName: 'Publish npm artifact'
+  displayName: 'Publish npm artifact' 
+

@@ -36,25 +36,3 @@ jobs:
       artifactName: 'e2e-server'
       publishLocation: 'pipeline'
     displayName: 'Publish build artifact'
-
-- deployment: DeployWebApp
-  displayName: 'Deploy to Production'
-  environment: 'Production'
-  strategy:
-    runOnce:
-      deploy:
-        steps:
-        - task: DownloadPipelineArtifact@2
-          inputs:
-            artifact: 'e2e-server'
-            path: '$(System.DefaultWorkingDirectory)'
-          displayName: 'Download Pipeline Artifact'
-
-        - task: AzureWebApp@1
-          inputs:
-            azureSubscription: 'fghjk'
-            appType: 'webAppLinux'
-            appName: 'Release Pipeline'
-            package: '$(System.DefaultWorkingDirectory)/**/*.zip'
-            runtimeStack: 'NODE|20-lts'
-          displayName: 'Azure Web App Deploy: Release Pipeline'

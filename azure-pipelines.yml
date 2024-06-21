@@ -34,3 +34,14 @@ steps:
     targetPath: '$(Build.ArtifactStagingDirectory)'
     publishLocation: 'pipeline'
   displayName: 'Publish npm artifact'
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Pipeline Artifact'
+  inputs:
+    artifact: 'e2e-server'
+    path: '$(System.DefaultWorkingDirectory)'
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'fghjk'
+    appType: 'webAppLinux'
+    appName: 'Release Pipeline'
+    package: '$(System.DefaultWorkingDirectory)/**/*.zip'

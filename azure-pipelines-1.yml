@@ -25,6 +25,12 @@ steps:
     publishLocation: 'Container'
 
 
-
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'my-connection'
+    appType: 'webAppLinux'
+    WebAppName: 'Test-1997'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/build'
 
     

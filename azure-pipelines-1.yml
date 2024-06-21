@@ -20,7 +20,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/build'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
@@ -31,6 +31,6 @@ steps:
     azureSubscription: 'my-connection'
     appType: 'webAppLinux'
     WebAppName: 'Test-1997'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/build'
+    packageForLinux: '$(System.DefaultWorkingDirectory)'
 
     

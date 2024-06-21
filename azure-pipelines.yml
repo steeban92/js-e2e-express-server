@@ -4,44 +4,57 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- task: UseNode@1
-  inputs:
-    version: '16.x'
-  displayName: 'Install Node.js'
+jobs:
+- job: Build
+  displayName: 'Build Job'
+  steps:
+  - task: UseNode@1
+    inputs:
+      version: '16.x'
+    displayName: 'Install Node.js'
 
-- script: |
-    npm install
-  displayName: 'npm install'
+  - script: |
+      npm install
+    displayName: 'npm install'
 
-- script: |
-    npm run build
-  displayName: 'npm build'
+  - script: |
+      npm run build
+    displayName: 'npm build'
 
-- task: CopyFiles@2
-  inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
-    contents: |
-       src/**
-       public/**
-       build/**  # Assuming your build output is in a directory named 'build'
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
-  displayName: 'Copy project files'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.SourcesDirectory)/build'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/webapp.zip'
+      replaceExistingArchive: true
+    displayName: 'Archive build output'
 
-- task: PublishPipelineArtifact@1
-  inputs:
-    artifactName: e2e-server
-    targetPath: '$(Build.ArtifactStagingDirectory)'
-    publishLocation: 'pipeline'
-  displayName: 'Publish npm artifact'
-- task: DownloadPipelineArtifact@2
-  displayName: 'Download Pipeline Artifact'
-  inputs:
-    artifact: 'e2e-server'
-    path: '$(System.DefaultWorkingDirectory)'
-- task: AzureWebApp@1
-  inputs:
-    azureSubscription: 'fghjk'
-    appType: 'webAppLinux'
-    appName: 'Release Pipeline'
-    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'e2e-server'
+      publishLocation: 'pipeline'
+    displayName: 'Publish build artifact'
+
+- deployment: DeployWebApp
+  displayName: 'Deploy to Production'
+  environment: 'Production'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            artifact: 'e2e-server'
+            path: '$(System.DefaultWorkingDirectory)'
+          displayName: 'Download Pipeline Artifact'
+
+        - task: AzureWebApp@1
+          inputs:
+            azureSubscription: 'fghjk'
+            appType: 'webAppLinux'
+            appName: 'Release Pipeline'
+            package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+            runtimeStack: 'NODE|20-lts'
+          displayName: 'Azure Web App Deploy: Release Pipeline'
